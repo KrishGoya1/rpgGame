@@ -1,40 +1,24 @@
+
 {
   "tileSize": 50,
-  "width": 14,
-  "height": 12,
+  "width": 10,
+  "height": 8,
   "objects": [
-    { "type": "spawn", "x": 2, "y": 5 },
-    { "type": "worldBorder", "x": 0, "y": 0, "width": 14, "height": 1 },
-    { "type": "worldBorder", "x": 0, "y": 11, "width": 14, "height": 1 },
-    { "type": "worldBorder", "x": 0, "y": 0, "width": 1, "height": 12 },
-    { "type": "worldBorder", "x": 13, "y": 0, "width": 1, "height": 12 },
+    { "type": "worldBorder", "x": 0, "y": 0, "width": 10, "height": 1, "solid": true },
+    { "type": "worldBorder", "x": 0, "y": 7, "width": 10, "height": 1, "solid": true },
+    { "type": "worldBorder", "x": 0, "y": 0, "width": 1, "height": 8, "solid": true },
+    { "type": "worldBorder", "x": 9, "y": 0, "width": 1, "height": 8, "solid": true },
 
-    { "type": "wall", "x": 0, "y": 2, "width": 5, "height": 1 },
-    { "type": "wall", "x": 5, "y": 0, "width": 1, "height": 3 },
-    { "type": "wall", "x": 6, "y": 0, "width": 8, "height": 1 },
-    { "type": "wall", "x": 6, "y": 4, "width": 8, "height": 1 },
-    { "type": "wall", "x": 0, "y": 7, "width": 5, "height": 1 },
-    { "type": "wall", "x": 8, "y": 7, "width": 6, "height": 1 },
+    { "type": "wall", "x": 1, "y": 1, "width": 8, "height": 1, "solid": true },
+    { "type": "wall", "x": 1, "y": 3, "width": 8, "height": 1, "solid": true },
 
-    { "type": "item", "x": 1, "y": 1, "width": 1, "height": 1, "name": "washbasin" },
-    { "type": "item", "x": 2, "y": 1, "width": 1, "height": 1, "name": "stove" },
-    { "type": "item", "x": 0, "y": 1, "width": 1, "height": 1, "name": "fridge" },
-    { "type": "item", "x": 3, "y": 1, "width": 2, "height": 1, "name": "compartment" },
+    { "type": "entrance", "id": "building1_exit", "x": 1, "y": 3, "width": 2, "height": 1, "solid": false, "interactable": true, "interactFunction": "goToBuilding", "targetMap": "map1", "targetId": "building1_entrance" },
 
-    { "type": "item", "x": 12, "y": 1, "width": 1, "height": 1, "name": "shoerack" },
-    { "type": "item", "x": 10, "y": 2, "width": 3, "height": 1, "name": "wall" },
-    { "type": "item", "x": 10, "y": 3, "width": 3, "height": 1, "name": "cupboard2" },
+    { "type": "table", "x": 4, "y": 2, "width": 2, "height": 1, "solid": true },
+    { "type": "chair", "x": 5, "y": 3, "width": 1, "height": 1, "solid": true },
 
-    { "type": "item", "x": 6, "y": 8, "width": 2, "height": 1, "name": "sofa" },
-    { "type": "item", "x": 8, "y": 8, "width": 2, "height": 2, "name": "carpet" },
-    { "type": "item", "x": 10, "y": 8, "width": 3, "height": 2, "name": "table" },
-    { "type": "item", "x": 11, "y": 8, "width": 1, "height": 1, "name": "tv" },
+    { "type": "npc", "x": 5, "y": 2, "width": 1, "height": 1, "solid": true, "interactable": true, "interactFunction": "sayHello" },
 
-    { "type": "item", "x": 1, "y": 9, "width": 3, "height": 2, "name": "bed" },
-    { "type": "item", "x": 4, "y": 10, "width": 1, "height": 1, "name": "lamp" },
-
-    { "type": "entrance", "id": "building1_exit", "x": 3, "y": 5, "width": 2, "height": 1, "targetMap": "map1", "targetId": "building1_entrance" }
-
-
+    { "type": "chest", "x": 7, "y": 5, "width": 1, "height": 1, "solid": false, "interactable": true, "interactFunction": "giveItem", "name": "Lucky Charm" }
   ]
 }

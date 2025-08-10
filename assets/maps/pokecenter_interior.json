@@ -1,0 +1,39 @@
+{
+  "tileSize": 50,
+  "width": 10,
+  "height": 8,
+  "objects": [
+    {
+      "type": "counter",
+      "x": 0,
+      "y": 3,
+      "width": 10,
+      "height": 2,
+      "solid": true
+    },
+    {
+      "type": "npc",
+      "x": 2,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "interactable": true,
+      "interactFunction": "healPokemon",
+      "text": "Welcome to the Poké Center! Your Pokémon are fully healed."
+    },
+    {
+      "type": "exit",
+      "id": "pokecenter_exit",
+      "x": 4,
+      "y": 7,
+      "width": 2,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "pinecrest_town",
+      "targetId": "pokecenter_entrance"
+    }
+  ]
+}

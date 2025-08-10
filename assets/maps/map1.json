@@ -1,0 +1,257 @@
+{
+  "tileSize": 50,
+  "width": 40,
+  "height": 30,
+  "objects": [
+    {
+      "type": "path",
+      "x": 0,
+      "y": 15,
+      "width": 40,
+      "height": 3,
+      "solid": false
+    },
+    {
+      "type": "path",
+      "x": 19,
+      "y": 0,
+      "width": 3,
+      "height": 30,
+      "solid": false
+    },
+
+    {
+      "type": "building",
+      "id": "building_pokecenter",
+      "x": 5,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "solid": true
+    },
+    {
+      "type": "entrance",
+      "id": "pokecenter_entrance",
+      "x": 8,
+      "y": 12,
+      "width": 2,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "pokecenter_interior",
+      "targetId": "pokecenter_exit"
+    },
+
+    {
+      "type": "building",
+      "id": "building_pokemart",
+      "x": 28,
+      "y": 6,
+      "width": 7,
+      "height": 5,
+      "solid": true
+    },
+    {
+      "type": "entrance",
+      "id": "pokemart_entrance",
+      "x": 30,
+      "y": 11,
+      "width": 2,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "pokemart_interior",
+      "targetId": "pokemart_exit"
+    },
+
+    {
+      "type": "building",
+      "id": "building_house1",
+      "x": 5,
+      "y": 20,
+      "width": 6,
+      "height": 4,
+      "solid": true
+    },
+    {
+      "type": "entrance",
+      "id": "house1_entrance",
+      "x": 7,
+      "y": 24,
+      "width": 2,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "house1_interior",
+      "targetId": "house1_exit"
+    },
+
+    {
+      "type": "building",
+      "id": "building_house2",
+      "x": 29,
+      "y": 20,
+      "width": 6,
+      "height": 4,
+      "solid": true
+    },
+    {
+      "type": "entrance",
+      "id": "house2_entrance",
+      "x": 31,
+      "y": 24,
+      "width": 2,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "house2_interior",
+      "targetId": "house2_exit"
+    },
+
+    {
+      "type": "tree",
+      "id": "tree_oak",
+      "x": 1,
+      "y": 1,
+      "width": 3,
+      "height": 3,
+      "solid": true
+    },
+    {
+      "type": "tree",
+      "id": "tree_oak",
+      "x": 36,
+      "y": 1,
+      "width": 3,
+      "height": 3,
+      "solid": true
+    },
+    {
+      "type": "tree",
+      "id": "tree_oak",
+      "x": 1,
+      "y": 26,
+      "width": 3,
+      "height": 3,
+      "solid": true
+    },
+    {
+      "type": "tree",
+      "id": "tree_oak",
+      "x": 36,
+      "y": 26,
+      "width": 3,
+      "height": 3,
+      "solid": true
+    },
+
+    {
+      "type": "flowers",
+      "id": "flowers_red",
+      "x": 10,
+      "y": 25,
+      "width": 4,
+      "height": 1,
+      "solid": false
+    },
+    {
+      "type": "bench",
+      "id": "bench_wood",
+      "x": 18,
+      "y": 20,
+      "width": 2,
+      "height": 1,
+      "solid": true
+    },
+
+    {
+      "type": "npc",
+      "id": "npc_oldman",
+      "x": 8,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "interactable": true,
+      "interactFunction": "sayHello",
+      "text": "My Pokémon are ready for battle! Did you know Rustboro City has the Devon Corporation?"
+    },
+    {
+      "type": "npc",
+      "id": "npc_woman",
+      "x": 30,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "interactable": true,
+      "interactFunction": "sayHello",
+      "text": "Welcome to Pinecrest Town! We're just west of Route 104, similar to how Rustboro City is positioned in Hoenn."
+    },
+    {
+      "type": "npc",
+      "id": "npc_boy",
+      "x": 20,
+      "y": 25,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "interactable": true,
+      "interactFunction": "sayHello",
+      "text": "This town reminds me of Fallarbor Town with its peaceful atmosphere."
+    },
+    {
+      "type": "npc",
+      "id": "npc_girl",
+      "x": 15,
+      "y": 10,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "interactable": true,
+      "interactFunction": "sayHello",
+      "text": "Have you visited Lilycove City? Their department store is amazing!"
+    },
+
+    {
+      "type": "sign",
+      "id": "sign_town",
+      "x": 20,
+      "y": 28,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "readSign",
+      "text": "Pinecrest Town\nPopulation: 32\n\"A peaceful town nestled between mountains\""
+    },
+    {
+      "type": "item",
+      "id": "item_potion",
+      "x": 22,
+      "y": 18,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "giveItem",
+      "name": "Potion"
+    },
+    {
+      "type": "item",
+      "id": "item_pokeball",
+      "x": 12,
+      "y": 8,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "giveItem",
+      "name": "Poké Ball"
+    }
+  ]
+}
