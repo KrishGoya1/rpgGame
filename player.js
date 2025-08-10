@@ -65,12 +65,13 @@ export class Player {
     const obj = this.nearbyObject.mapData;
 
     // Entrances
-    if (obj.type === "entrance" && obj.targetMap) {
-      console.log(`Entering ${obj.targetMap}...`);
-      this.scene.pendingSpawnName = obj.targetSpawn || null;
-      this.scene.mapLoader.loadMap(obj.targetMap);
-      return;
-    }
+    if (obj.type === "entrance" && obj.targetMap && obj.targetId) {
+  console.log(`Entering ${obj.targetMap} via ${obj.targetId}...`);
+  this.scene.pendingEntranceId = obj.targetId; // store entrance id for target map
+  this.scene.mapLoader.loadMap(obj.targetMap);
+  return;
+}
+
 
     // Items
     if (obj.type === "item") {

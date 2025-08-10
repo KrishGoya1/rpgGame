@@ -49,6 +49,18 @@ export class MapLoader {
       const pw = (obj.width || 1) * this.tileSize;
       const ph = (obj.height || 1) * this.tileSize;
 
+      // After loading all objects
+if (this.scene.pendingEntranceId) {
+  const match = mapData.objects.find(o => o.type === "entrance" && o.id === this.scene.pendingEntranceId);
+  if (match && this.scene.player?.sprite) {
+    const spawnX = (match.x * this.tileSize) + (this.tileSize / 2);
+    const spawnY = (match.y * this.tileSize) + (this.tileSize / 2);
+    this.scene.player.sprite.setPosition(spawnX, spawnY);
+  }
+  this.scene.pendingEntranceId = null;
+}
+
+
       // SPAWN POINTS
       if (obj.type === "spawn") {
         if (this.scene.pendingSpawnName) {
