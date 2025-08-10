@@ -6,17 +6,19 @@ import { MapLoader } from './mapLoader.js';
 class MainScene extends Phaser.Scene {
   constructor() {
     super('MainScene');
+    this.debugMode = true;
   }
 
   preload() {
-    this.load.json('map1', 'map1.json');
+  this.load.json('map1', 'map1.json');
+  this.load.json('building1', 'building1.json'); 
 
-    // Placeholder player texture
-    this.add.graphics()
-      .fillStyle(0xffff00, 1)
-      .fillRect(0, 0, 40, 40)
-      .generateTexture('player', 40, 40);
-  }
+  this.add.graphics()
+    .fillStyle(0xffff00, 1)
+    .fillRect(0, 0, 40, 40)
+    .generateTexture('player', 40, 40);
+}
+
 
   create() {
     this.renderer = new Renderer(this);

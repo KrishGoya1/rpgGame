@@ -1,13 +1,16 @@
-// MapLoader.js (updated)
+// mapLoader.js — final version with .mapData fix, spawn + entrance + debug
 export class MapLoader {
   constructor(scene, renderer) {
     this.scene = scene;
     this.renderer = renderer;
-    this.tileSize = 50; // default, overridden by JSON
+    this.tileSize = 50; // overridden by JSON
+    this._visuals = [];
+    this._bodies = [];
+    this._colliders = [];
+    this.interactiveObjects = [];
   }
 
   ensurePixelTexture() {
-    // create a 1x1 white pixel texture if it doesn't exist
     if (!this.scene.textures.exists("__px")) {
       const gfx = this.scene.add.graphics();
       gfx.fillStyle(0xffffff, 1);
@@ -17,6 +20,16 @@ export class MapLoader {
     }
   }
 
+  clearPreviousMap() {
+    this._colliders.forEach(c => { if (c?.destroy) c.destroy(); });
+    this._bodies.forEach(b => { if (b?.destroy) b.destroy(); });
+    this._visuals.forEach(v => { if (v?.destroy) v.destroy(); });
+    this._colliders.length = 0;
+    this._bodies.length = 0;
+    this._visuals.length = 0;
+    this.interactiveObjects.length = 0;
+  }
+
   loadMap(jsonKey) {
     const mapData = this.scene.cache.json.get(jsonKey);
     if (!mapData) {
@@ -24,102 +37,100 @@ export class MapLoader {
       return;
     }
 
+    this.clearPreviousMap();
     this.tileSize = mapData.tileSize || this.tileSize;
-    const objects = mapData.objects || [];
-
-    // Ensure we have a pixel texture for consistent sprites/bodies.
     this.ensurePixelTexture();
 
-    // Make sure player is drawn above walls
-    if (this.scene.player && this.scene.player.sprite) {
-      this.scene.player.sprite.setDepth(10);
-    }
+    let spawnObj = null;
 
-    objects.forEach(obj => {
+    mapData.objects.forEach(obj => {
       const px = obj.x * this.tileSize;
       const py = obj.y * this.tileSize;
       const pw = (obj.width || 1) * this.tileSize;
       const ph = (obj.height || 1) * this.tileSize;
 
-      if (obj.type === "worldBorder" || obj.type === "wall") {
-        // color: red for border, blue for in-world walls
-        const color = obj.type === "worldBorder" ? 0xff0000 : 0x0000ff;
-
-        // Draw a visible debug rectangle using the renderer (top-left origin)
-        // (optional) If you prefer no visible rectangle, comment out this line.
-        this.renderer.drawObject(px, py, pw, ph, color);
-
-        // Create a proper staticImage that uses a real texture so display/body line up
-        const wall = this.scene.physics.add
-          .staticImage(px, py, "__px") // top-left world pos
-          .setOrigin(0, 0)             // top-left origin
-          .setDisplaySize(pw, ph);
-
-        // Optionally tint the visible rectangle (only visible if you leave wall visible)
-        wall.setTint(color);
-
-        // Ensure physics body matches display size and has zero offset
-        if (wall.body) {
-          wall.body.setSize(pw, ph);
-          wall.body.setOffset(0, 0);
+      // SPAWN POINTS
+      if (obj.type === "spawn") {
+        if (this.scene.pendingSpawnName) {
+          if (obj.name === this.scene.pendingSpawnName) spawnObj = obj;
+        } else if (!spawnObj) {
+          spawnObj = obj;
         }
+        return;
+      }
 
-        // Keep the physics sprite hidden if you don't want duplicate visuals
-        // (we already drew with renderer.drawObject). If you want to see the actual texture,
-        // comment out the next line.
-        wall.setVisible(false);
-
-        // Add collider between player and wall
-        if (this.scene.player && this.scene.player.sprite) {
-          this.scene.physics.add.collider(this.scene.player.sprite, wall);
+      // WALLS & BORDERS
+      if (obj.type === "worldBorder" || obj.type === "wall") {
+        const color = obj.type === "worldBorder" ? 0xff0000 : 0x0000ff;
+        if (this.scene.debugMode) {
+          this._visuals.push(this.renderer.drawObject(px, py, pw, ph, color));
+          this._visuals.push(this.scene.add.text(px, py - 12, obj.type, { fontSize: '12px', fill: '#fff' }));
+        }
+        const wall = this.scene.physics.add.staticImage(px, py, "__px")
+          .setOrigin(0, 0).setDisplaySize(pw, ph).setVisible(false);
+        if (wall.body) wall.body.setSize(pw, ph).setOffset(0, 0);
+        this._bodies.push(wall);
+        if (this.scene.player?.sprite) {
+          this._colliders.push(this.scene.physics.add.collider(this.scene.player.sprite, wall));
         }
       }
 
+      // ITEMS
       if (obj.type === "item") {
-        // Draw item (visible)
-        this.renderer.drawObject(px, py, pw, ph, 0xffff00);
-
-        // Create a sensor for pickup collisions (optional)
-        const itemBody = this.scene.physics.add.staticImage(px, py, "__px")
-          .setOrigin(0, 0)
-          .setDisplaySize(pw, ph)
-          .setVisible(false);
-
-        if (itemBody.body) {
-          itemBody.body.setSize(pw, ph);
-          itemBody.body.setOffset(0, 0);
+        if (this.scene.debugMode) {
+          this._visuals.push(this.renderer.drawObject(px, py, pw, ph, 0xffff00));
+          this._visuals.push(this.scene.add.text(px, py - 12, obj.name || "Item", { fontSize: '12px', fill: '#000' }));
         }
+        const itemBody = this.scene.physics.add.staticImage(px, py, "__px")
+          .setOrigin(0, 0).setDisplaySize(pw, ph).setVisible(false);
+        if (itemBody.body) itemBody.body.setSize(pw, ph).setOffset(0, 0);
+        itemBody.mapData = obj; // store map JSON in .mapData
+        this._bodies.push(itemBody);
+        this.interactiveObjects.push(itemBody);
+        if (this.scene.player?.sprite) {
+          this._colliders.push(this.scene.physics.add.overlap(
+            this.scene.player.sprite, itemBody,
+            () => { this.scene.player.nearbyObject = itemBody; }
+          ));
+        }
+      }
 
-        // Example overlap: when player overlaps item, pick it up
-        if (this.scene.player && this.scene.player.sprite) {
-          this.scene.physics.add.overlap(
-            this.scene.player.sprite,
-            itemBody,
-            () => {
-              // remove visuals and body
-              itemBody.destroy();
-              // you can add a proper event here, e.g. scene.events.emit('pickup', obj);
-              this.scene.ui && this.scene.ui.show && this.scene.ui.show("Picked up item!");
-            },
-            null,
-            this
-          );
+      // ENTRANCES
+      if (obj.type === "entrance") {
+        if (this.scene.debugMode) {
+          this._visuals.push(this.renderer.drawObject(px, py, pw, ph, 0x00ff00));
+          this._visuals.push(this.scene.add.text(px, py - 12, "Entrance", { fontSize: '12px', fill: '#fff' }));
+        }
+        const entranceBody = this.scene.physics.add.staticImage(px, py, "__px")
+          .setOrigin(0, 0).setDisplaySize(pw, ph).setVisible(false);
+        if (entranceBody.body) entranceBody.body.setSize(pw, ph).setOffset(0, 0);
+        entranceBody.mapData = obj; // store map JSON in .mapData
+        this._bodies.push(entranceBody);
+        this.interactiveObjects.push(entranceBody);
+        if (this.scene.player?.sprite) {
+          this._colliders.push(this.scene.physics.add.overlap(
+            this.scene.player.sprite, entranceBody,
+            () => { this.scene.player.nearbyObject = entranceBody; }
+          ));
         }
       }
     });
 
-    // Set bounds for physics and camera
-    this.scene.physics.world.setBounds(
-      0,
-      0,
-      (mapData.width || 0) * this.tileSize,
-      (mapData.height || 0) * this.tileSize
-    );
-    this.scene.cameras.main.setBounds(
-      0,
-      0,
-      (mapData.width || 0) * this.tileSize,
-      (mapData.height || 0) * this.tileSize
-    );
+    // Physics & camera bounds
+    this.scene.physics.world.setBounds(0, 0, (mapData.width || 0) * this.tileSize, (mapData.height || 0) * this.tileSize);
+    this.scene.cameras.main.setBounds(0, 0, (mapData.width || 0) * this.tileSize, (mapData.height || 0) * this.tileSize);
+
+    // Move player to spawn point
+    if (spawnObj && this.scene.player?.sprite) {
+      const spawnX = (spawnObj.x * this.tileSize) + (this.tileSize / 2);
+      const spawnY = (spawnObj.y * this.tileSize) + (this.tileSize / 2);
+      this.scene.player.sprite.setPosition(spawnX, spawnY);
+    }
+    this.scene.pendingSpawnName = null;
+
+    // Keep player on top
+    if (this.scene.player?.sprite) {
+      this.scene.player.sprite.setDepth(1000);
+    }
   }
 }

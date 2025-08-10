@@ -1,19 +1,15 @@
 export class Player {
-  /**
-   * 
-   * @param {Phaser.Scene} scene - The Phaser scene
-   * @param {number} x - Starting X position
-   * @param {number} y - Starting Y position
-   */
   constructor(scene, x, y) {
     this.scene = scene;
-    this.speed = 200; // Movement speed (px/s)
+    this.speed = 200;
 
-    // Create the player as a physics sprite
+    // Player sprite
     this.sprite = scene.physics.add.sprite(x, y, 'player');
     this.sprite.setCollideWorldBounds(true);
+    this.sprite.body.setSize(this.sprite.width, this.sprite.height);
+    this.sprite.body.setOffset(0, 0);
 
-    // Input keys
+    // Input
     this.cursors = scene.input.keyboard.createCursorKeys();
     this.keys = scene.input.keyboard.addKeys({
       W: Phaser.Input.Keyboard.KeyCodes.W,
@@ -22,23 +18,24 @@ export class Player {
       D: Phaser.Input.Keyboard.KeyCodes.D,
       SPACE: Phaser.Input.Keyboard.KeyCodes.SPACE
     });
+
+    // Current nearby object
+    this.nearbyObject = null;
   }
 
-  /**
-   * Call every frame to update player movement.
-   */
   update() {
+    // Reset nearby object each frame
+    this.nearbyObject = null;
+
     const body = this.sprite.body;
     body.setVelocity(0);
 
-    // Horizontal movement
+    // Movement
     if (this.cursors.left.isDown || this.keys.A.isDown) {
       body.setVelocityX(-this.speed);
     } else if (this.cursors.right.isDown || this.keys.D.isDown) {
       body.setVelocityX(this.speed);
     }
-
-    // Vertical movement
     if (this.cursors.up.isDown || this.keys.W.isDown) {
       body.setVelocityY(-this.speed);
     } else if (this.cursors.down.isDown || this.keys.S.isDown) {
@@ -47,13 +44,41 @@ export class Player {
 
     // Normalize diagonal speed
     body.velocity.normalize().scale(this.speed);
+
+    // Manual overlap check for reliability
+    this.scene.mapLoader.interactiveObjects.forEach(obj => {
+      if (Phaser.Geom.Intersects.RectangleToRectangle(
+        this.sprite.getBounds(),
+        obj.getBounds()
+      )) {
+        this.nearbyObject = obj;
+      }
+    });
   }
 
-  /**
-   * Handles interaction (e.g., talk to NPC, open door)
-   */
   interact() {
-    console.log('Interaction triggered');
-    // Later: check for nearby interactive objects
+    if (!this.nearbyObject || !this.nearbyObject.mapData) {
+      console.log("Nothing to interact with.");
+      return;
+    }
+
+    const obj = this.nearbyObject.mapData;
+
+    // Entrances
+    if (obj.type === "entrance" && obj.targetMap) {
+      console.log(`Entering ${obj.targetMap}...`);
+      this.scene.pendingSpawnName = obj.targetSpawn || null;
+      this.scene.mapLoader.loadMap(obj.targetMap);
+      return;
+    }
+
+    // Items
+    if (obj.type === "item") {
+      console.log(`Picked up ${obj.name || 'item'}`);
+      this.nearbyObject.destroy(); // safely remove object
+      return;
+    }
+
+    console.log("Interacted with object:", obj.type);
   }
 }
