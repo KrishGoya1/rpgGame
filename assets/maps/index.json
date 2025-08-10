@@ -1,4 +1,9 @@
-[
-    "map1.json",
-    "pokecenter_interior.json"
-]
+{
+  "maps": [
+    "map1",
+    "pokecenter_interior",
+    "pokemart_interior",
+    "house1_interior",
+    "house2_interior"
+  ]
+}

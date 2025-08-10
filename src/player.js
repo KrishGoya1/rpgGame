@@ -21,13 +21,11 @@ export class Player {
   }
 
   update() {
-    // Reset nearby each frame
     this.nearbyObject = null;
 
     const body = this.sprite.body;
     body.setVelocity(0);
 
-    // Movement
     if (this.cursors.left.isDown || this.keys.A.isDown) {
       body.setVelocityX(-this.speed);
     } else if (this.cursors.right.isDown || this.keys.D.isDown) {
@@ -41,30 +39,26 @@ export class Player {
 
     body.velocity.normalize().scale(this.speed);
 
-    // --- Improved interaction detection ---
-    // Prefer precise physics overlap; fall back to a small distance test
-  // --- Improved interaction detection ---
-this.nearbyObject = null;
-const interactables = this.scene.mapLoader.interactiveObjects;
-for (let i = 0; i < interactables.length; i++) {
-  const obj = interactables[i];
-  
-  // Compute distance from player center to object center
-  const px = this.sprite.x;
-  const py = this.sprite.y;
-  const ox = obj.x + (obj.displayWidth / 2);
-  const oy = obj.y + (obj.displayHeight / 2);
-  const dist = Phaser.Math.Distance.Between(px, py, ox, oy);
+    // Interaction radius detection (uses physics bodies created by MapLoader)
+    const interactables = (this.scene.mapLoader && this.scene.mapLoader.interactiveObjects) ? this.scene.mapLoader.interactiveObjects : [];
+    for (let i = 0; i < interactables.length; i++) {
+      const obj = interactables[i];
+      if (!obj || !obj.mapData) continue;
 
-  // Interaction radius — set bigger than tile size
-  const interactionRadius = (this.scene.mapLoader?.tileSize || 50) * 1.2;
+      // obj is the static body created at top-left (setOrigin(0,0)), so compute its center:
+      const ox = obj.x + (obj.displayWidth / 2);
+      const oy = obj.y + (obj.displayHeight / 2);
 
-  if (dist <= interactionRadius) {
-    this.nearbyObject = obj;
-    break;
-  }
-}
+      const dist = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, ox, oy);
 
+      // make radius configurable per-object, fallback to 1.2 tiles
+      const interactionRadius = (obj.mapData?.interactionRadius) || ((this.scene.mapLoader?.tileSize || 50) * 1.2);
+
+      if (dist <= interactionRadius) {
+        this.nearbyObject = obj;
+        break;
+      }
+    }
   }
 
   interact() {
@@ -80,26 +74,24 @@ for (let i = 0; i < interactables.length; i++) {
       return;
     }
 
-    // If the object is an entrance, ensure we set pendingEntranceId to the targetId
-    if (obj.type === "entrance" && obj.targetMap && obj.targetId) {
-      // store target id (the entrance id we want to appear at in the destination map)
+    // If it's an entrance, set pendingEntranceId to targetId first (so target map knows where to spawn)
+    if ((obj.type === 'entrance' || obj.type === 'exit') && obj.targetMap && obj.targetId) {
       this.scene.pendingEntranceId = obj.targetId;
-      // then call the registered interaction function (if any) so behavior is consistent
+      // prefer calling object's registered function, else fallback to direct map load
       if (obj.interactFunction && typeof this.scene.objectInteractions?.[obj.interactFunction] === 'function') {
         this.scene.objectInteractions[obj.interactFunction](this.nearbyObject, this.scene, this);
       } else {
-        // fallback: directly change maps (keeps backwards compatibility)
         this.scene.mapLoader.loadMap(obj.targetMap);
       }
       return;
     }
 
-    // For other interactables, call object's function via registry if exists
+    // otherwise call registered interaction
     if (obj.interactFunction && typeof this.scene.objectInteractions?.[obj.interactFunction] === 'function') {
       this.scene.objectInteractions[obj.interactFunction](this.nearbyObject, this.scene, this);
       return;
     }
 
-    console.log("Interacted with object:", obj.type);
+    console.log('Interacted with object:', obj.type);
   }
 }
