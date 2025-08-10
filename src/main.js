@@ -1,146 +1,153 @@
-export class MapLoader {
-  constructor(scene, renderer) {
-    this.scene = scene;
-    this.renderer = renderer;
-    this.tileSize = 50;
-    this.currentMap = null;
+import { Renderer } from './renderer.js';
+import { Player } from './player.js';
+import { CameraController } from './camera.js';
+import { MapLoader } from './mapLoader.js';
 
-    // bookkeeping arrays for cleanup
-    this.mapObjects = [];      // all visual GameObjects (images, rectangles, texts)
-    this.mapBodies = [];       // physics bodies we create (staticImage sensors)
-    this.colliders = [];       // collider/overlap objects to destroy
-    this.interactiveObjects = []; // bodies that are interactable (sensors)
+class MainScene extends Phaser.Scene {
+  constructor() {
+    super('MainScene');
+    this.debugMode = true;
+    this.pendingEntranceId = null;
   }
 
-  ensurePixelTexture() {
-    if (!this.scene.textures.exists('__px')) {
-      const gfx = this.scene.add.graphics();
-      gfx.fillStyle(0xffffff, 1);
-      gfx.fillRect(0, 0, 1, 1);
-      gfx.generateTexture('__px', 1, 1);
-      gfx.destroy();
-    }
+  preload() {
+    // load manifest (manifest can be either an array ["map1.json", ...]
+    // or an object { "maps": ["map1", ...] } — we handle both in create()
+    this.load.json('mapManifest', 'assets/maps/index.json');
+
+    // placeholder player texture
+    this.add.graphics()
+      .fillStyle(0xffff00, 1)
+      .fillRect(0, 0, 40, 40)
+      .generateTexture('player', 40, 40);
   }
 
-  clearPreviousMap() {
-    // destroy colliders first
-    this.colliders.forEach(c => { try { c.destroy(); } catch (e) {} });
-    this.colliders = [];
+  create() {
+    // read the manifest (already loaded during preload)
+    const manifestRaw = this.cache.json.get('mapManifest');
 
-    // destroy physics bodies and visuals
-    this.mapBodies.forEach(b => { try { b.destroy(); } catch (e) {} });
-    this.mapBodies = [];
-
-    this.mapObjects.forEach(o => { try { o.destroy(); } catch (e) {} });
-    this.mapObjects = [];
-
-    this.interactiveObjects = [];
-  }
-
-  loadMap(mapKey) {
-    const mapData = this.scene.cache.json.get(mapKey);
-    if (!mapData) {
-      console.error(`Map data for "${mapKey}" not found`);
-      return;
+    // Manifest can be either:
+    //  - an array like ["map1.json","pokecenter_interior.json"]
+    //  - an object like { "maps": ["map1","pokecenter_interior"] }
+    let manifestFiles = [];
+    if (Array.isArray(manifestRaw)) {
+      manifestFiles = manifestRaw.slice(); // copy
+    } else if (manifestRaw && Array.isArray(manifestRaw.maps)) {
+      manifestFiles = manifestRaw.maps.slice();
+    } else {
+      console.warn('Map manifest missing or invalid — falling back to ["map1"]');
+      manifestFiles = ['map1.json'];
     }
 
-    this.clearPreviousMap();
-    this.tileSize = mapData.tileSize || 50;
-    this.currentMap = mapKey;
-    this.ensurePixelTexture();
-
-    // create visuals + physics bodies
-    mapData.objects.forEach(obj => {
-      const px = obj.x * this.tileSize;
-      const py = obj.y * this.tileSize;
-      const pw = (obj.width || 1) * this.tileSize;
-      const ph = (obj.height || 1) * this.tileSize;
-
-      // VISUAL (image if texture exists, else colored rectangle depending on type)
-      let visual;
-      if (obj.id && this.scene.textures.exists(obj.id)) {
-        visual = this.scene.add.image(px + pw/2, py + ph/2, obj.id).setDisplaySize(pw, ph).setOrigin(0.5);
-      } else {
-        // fallback color by type
-        let color = 0x999999;
-        switch (obj.type) {
-          case 'item': color = 0xff0000; break;       // red
-          case 'building': color = 0x0000ff; break;   // blue
-          case 'entrance': color = 0x00ff00; break;   // green
-          case 'wall': color = 0xffffff; break;       // white
-          case 'worldBorder': color = 0x000000; break;// black
-          default: color = 0x999999;
-        }
-        visual = this.scene.add.rectangle(px + pw/2, py + ph/2, pw, ph, color, 0.9).setOrigin(0.5);
-      }
-      this.mapObjects.push(visual);
-
-      // Optional debug label
-      if (this.scene.debugMode) {
-        const label = this.scene.add.text(px + pw/2, py - 10, obj.id || obj.type || '', { fontSize: '12px', fill: '#fff' }).setOrigin(0.5);
-        this.mapObjects.push(label);
-      }
-
-      // PHYSICS BODY (invisible) - top-left origin, so x=px,y=py
-      const body = this.scene.physics.add.staticImage(px, py, '__px').setOrigin(0, 0).setDisplaySize(pw, ph).setVisible(false);
-
-      // store metadata safely
-      body.mapData = obj;
-
-      // keep track of body so we can clean up later
-      this.mapBodies.push(body);
-
-      // collisions for solids
-      if (obj.solid && this.scene.player?.sprite) {
-        const col = this.scene.physics.add.collider(this.scene.player.sprite, body);
-        this.colliders.push(col);
-      }
-
-      // add to interactive list and optional overlap callback (so overlap immediate sets nearbyObject)
-      if (obj.interactable && this.scene.player?.sprite) {
-        this.interactiveObjects.push(body);
-        const overlap = this.scene.physics.add.overlap(this.scene.player.sprite, body, () => {
-          // when physics overlap occurs, set player's nearbyObject directly
-          if (this.scene.player) this.scene.player.nearbyObject = body;
-        });
-        this.colliders.push(overlap);
-      }
+    // Normalize entries: ensure each entry is a filename (with extension) and compute keys
+    // We'll queue loads using keys without extension (e.g., 'map1') so cache key is predictable.
+    this._manifestKeys = []; // store keys we requested
+    manifestFiles.forEach(entry => {
+      if (!entry) return;
+      let filename = String(entry);
+      // If user provided e.g. "map1" (no extension), add .json for path; if they provided "map1.json", keep it.
+      const hasExt = filename.toLowerCase().endsWith('.json');
+      const key = hasExt ? filename.slice(0, -5) : filename;
+      const path = hasExt ? `assets/maps/${filename}` : `assets/maps/${key}.json`;
+      this.load.json(key, path);
+      this._manifestKeys.push(key);
     });
 
-    // set world & camera bounds based on map size (if available)
-    const mapPixelW = (mapData.width || 0) * this.tileSize;
-    const mapPixelH = (mapData.height || 0) * this.tileSize;
-    if (mapPixelW > 0 && mapPixelH > 0) {
-      this.scene.physics.world.setBounds(0, 0, mapPixelW, mapPixelH);
-      if (this.scene.cameras && this.scene.cameras.main) {
-        this.scene.cameras.main.setBounds(0, 0, mapPixelW, mapPixelH);
-      }
-    }
+    // Create renderer, player and mapLoader early (player must exist for physics callbacks to attach)
+    this.renderer = new Renderer(this);
+    this.player = new Player(this, 100, 100);
+    this.inventory = [];
+    this.mapLoader = new MapLoader(this, this.renderer);
 
-    // Set player spawn
-    if (this.scene.pendingEntranceId) {
-      const match = mapData.objects.find(o => (o.type === 'entrance' || o.type === 'exit') && o.id === this.scene.pendingEntranceId);
-      if (match && this.scene.player?.sprite) {
-        const spawnX = (match.x * this.tileSize) + (this.tileSize / 2);
-        const spawnY = (match.y * this.tileSize) + (this.tileSize / 2);
-        this.scene.player.sprite.setPosition(spawnX, spawnY);
-      } else {
-        console.warn(`Pending entrance id "${this.scene.pendingEntranceId}" not found in map "${mapKey}"`);
+    // Object interactions registry (add more functions here)
+    this.objectInteractions = {
+      sayHello: (body, scene, player) => {
+        const msg = body.mapData?.text || "Hello!";
+        scene.showDialog(msg);
+      },
+      giveItem: (body, scene, player) => {
+        const name = body.mapData?.name || "Mysterious Item";
+        scene.inventory.push(name);
+        scene.showDialog(`Picked up: ${name}`);
+        // destroy both body and any visual linked to it (mapLoader cleans visuals)
+        body.destroy();
+      },
+      goToBuilding: (body, scene, player) => {
+        const data = body.mapData;
+        if (data?.targetMap && data?.targetId) {
+          scene.pendingEntranceId = data.targetId;
+          scene.mapLoader.loadMap(data.targetMap);
+        } else {
+          console.warn('goToBuilding missing targetMap/targetId', data);
+        }
+      },
+      readSign: (body, scene, player) => {
+        const txt = body.mapData?.text || '';
+        scene.showDialog(txt);
+      },
+      healPokemon: (body, scene, player) => {
+        scene.showDialog(body.mapData?.text || 'Your Pokémon feel refreshed.');
+      },
+      openShop: (body, scene, player) => {
+        scene.showDialog('Shop UI not implemented yet.');
       }
-      this.scene.pendingEntranceId = null;
-    } else {
-      // fallback: use first spawn object in map (if exists)
-      const spawn = mapData.objects.find(o => o.type === 'spawn');
-      if (spawn && this.scene.player?.sprite) {
-        const spawnX = (spawn.x * this.tileSize) + (this.tileSize / 2);
-        const spawnY = (spawn.y * this.tileSize) + (this.tileSize / 2);
-        this.scene.player.sprite.setPosition(spawnX, spawnY);
-      }
-    }
+    };
 
-    // ensure camera follows player
-    if (this.scene.cameras && this.scene.cameras.main && this.scene.player?.sprite) {
-      this.scene.cameras.main.startFollow(this.scene.player.sprite, true, 0.08, 0.08);
+    // small dialog helper
+    this.dialogText = null;
+    this.showDialog = (text) => {
+      if (this.dialogText) this.dialogText.destroy();
+      this.dialogText = this.add.text(this.player.sprite.x, this.player.sprite.y - 60, text, {
+        fontSize: '14px', fill: '#fff', backgroundColor: '#000', padding: { x: 6, y: 4 }
+      }).setOrigin(0.5).setDepth(2000);
+      this.time.delayedCall(1800, () => {
+        if (this.dialogText) {
+          this.dialogText.destroy();
+          this.dialogText = null;
+        }
+      });
+    };
+
+    // When all queued map JSON files finish loading:
+    this.load.once('complete', () => {
+      // choose starting map key: prefer 'map1' if present, else first manifest key
+      const startingKey = this._manifestKeys.includes('map1') ? 'map1' : (this._manifestKeys[0] || 'map1');
+
+      // load the starting map (mapLoader will position player / set bounds)
+      this.mapLoader.loadMap(startingKey);
+
+      // Create camera controller now that world bounds are set
+      this.cameraController = new CameraController(
+        this,
+        this.player.sprite,
+        this.physics.world.bounds.width,
+        this.physics.world.bounds.height
+      );
+    });
+
+    // start queued map loading (this triggers the 'complete' event when done)
+    this.load.start();
+  }
+
+  update() {
+    // only allow updates once a map is loaded
+    if (this.mapLoader && this.mapLoader.currentMap) {
+      this.player.update();
+      if (Phaser.Input.Keyboard.JustDown(this.player.keys.SPACE)) {
+        this.player.interact();
+      }
     }
   }
 }
+
+const config = {
+  type: Phaser.AUTO,
+  width: 960,
+  height: 540,
+  backgroundColor: '#000',
+  parent: 'game-container',
+  physics: { default: 'arcade', arcade: { debug: false } },
+  scene: [MainScene]
+};
+
+new Phaser.Game(config);
