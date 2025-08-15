@@ -1,18 +1,28 @@
 export class CameraController {
   /**
-   * 
-   * @param {Phaser.Scene} scene - Phaser scene
-   * @param {Phaser.GameObjects.Sprite} target - Sprite to follow
-   * @param {number} mapWidth - Map width in pixels
-   * @param {number} mapHeight - Map height in pixels
+   * @param {Phaser.Scene} scene
+   * @param {Phaser.GameObjects.Sprite} target
+   * @param {number} mapWidth
+   * @param {number} mapHeight
    */
   constructor(scene, target, mapWidth, mapHeight) {
     this.scene = scene;
+    const cam = scene.cameras.main;
 
-    // Make camera follow the player
-    scene.cameras.main.startFollow(target, true, 0.08, 0.08);
+    // crisp movement & light smoothing
+    cam.roundPixels = true;
+    cam.setLerp(0.12, 0.12);
+    cam.startFollow(target, true);
 
-    // Set camera bounds to map size
-    scene.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+    // Add a small deadzone so the camera doesn't micro-jitter
+    const dzW = Math.floor(scene.scale.width * 0.25);
+    const dzH = Math.floor(scene.scale.height * 0.25);
+    cam.setDeadzone(dzW, dzH);
+
+    // Optional: slight zoom for tighter framing (comment out if undesired)
+    cam.setZoom(1.15);
+
+    // Bounds must match physics/world bounds
+    cam.setBounds(0, 0, mapWidth, mapHeight);
   }
 }

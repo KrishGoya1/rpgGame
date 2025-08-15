@@ -1,7 +1,7 @@
 export class Player {
   constructor(scene, x, y) {
     this.scene = scene;
-    this.speed = 200;
+    this.speed = 210;
 
     this.sprite = scene.physics.add.sprite(x, y, 'player');
     this.sprite.setCollideWorldBounds(true);
@@ -17,6 +17,7 @@ export class Player {
       SPACE: Phaser.Input.Keyboard.KeyCodes.SPACE
     });
 
+    // Hint UI toggled when near something interactable
     this.nearbyObject = null;
   }
 
@@ -37,7 +38,10 @@ export class Player {
       body.setVelocityY(this.speed);
     }
 
-    body.velocity.normalize().scale(this.speed);
+    // Prevent diagonal speed boost and avoid normalizing a zero vector
+    if (body.velocity.x !== 0 || body.velocity.y !== 0) {
+      body.velocity.normalize().scale(this.speed);
+    }
 
     // Interaction radius detection (uses physics bodies created by MapLoader)
     const interactables = (this.scene.mapLoader && this.scene.mapLoader.interactiveObjects) ? this.scene.mapLoader.interactiveObjects : [];
@@ -45,9 +49,9 @@ export class Player {
       const obj = interactables[i];
       if (!obj || !obj.mapData) continue;
 
-      // obj is the static body created at top-left (setOrigin(0,0)), so compute its center:
-      const ox = obj.x + (obj.displayWidth / 2);
-      const oy = obj.y + (obj.displayHeight / 2);
+      // Images created are centered at (obj.x,obj.y), so use them directly
+      const ox = obj.x;
+      const oy = obj.y;
 
       const dist = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, ox, oy);
 
@@ -63,21 +67,18 @@ export class Player {
 
   interact() {
     if (!this.nearbyObject || !this.nearbyObject.mapData) {
-      console.log("Nothing to interact with.");
+      // Nothing nearby
       return;
     }
 
     const obj = this.nearbyObject.mapData;
 
     if (!obj.interactable) {
-      console.log("This object is not interactable.");
       return;
     }
 
-    // If it's an entrance, set pendingEntranceId to targetId first (so target map knows where to spawn)
     if ((obj.type === 'entrance' || obj.type === 'exit') && obj.targetMap && obj.targetId) {
       this.scene.pendingEntranceId = obj.targetId;
-      // prefer calling object's registered function, else fallback to direct map load
       if (obj.interactFunction && typeof this.scene.objectInteractions?.[obj.interactFunction] === 'function') {
         this.scene.objectInteractions[obj.interactFunction](this.nearbyObject, this.scene, this);
       } else {
@@ -86,12 +87,9 @@ export class Player {
       return;
     }
 
-    // otherwise call registered interaction
     if (obj.interactFunction && typeof this.scene.objectInteractions?.[obj.interactFunction] === 'function') {
       this.scene.objectInteractions[obj.interactFunction](this.nearbyObject, this.scene, this);
       return;
     }
-
-    console.log('Interacted with object:', obj.type);
   }
 }

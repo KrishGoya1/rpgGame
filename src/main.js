@@ -6,17 +6,18 @@ import { MapLoader } from './mapLoader.js';
 class MainScene extends Phaser.Scene {
   constructor() {
     super('MainScene');
-    this.debugMode = true;
+    this.debugMode = false;
     this.pendingEntranceId = null;
+    this._manifestKeys = [];
+    this.hintText = null;
+    this.dialogText = null;
   }
 
   preload() {
-    // load manifest (manifest can be either an array ["map1.json", ...]
-    // or an object { "maps": ["map1", ...] } — we handle both in create()
-    // === NOTE: index.html is inside src/, maps folder is ../assets/maps
+    // Load map manifest (see create() for flexible formats)
     this.load.json('mapManifest', '../assets/maps/index.json');
 
-    // placeholder player texture
+    // Placeholder player texture
     this.add.graphics()
       .fillStyle(0xffff00, 1)
       .fillRect(0, 0, 40, 40)
@@ -24,44 +25,53 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
-    // read the manifest (already loaded during preload)
+    // Improve default input experience
+    if (this.input.keyboard) {
+  this.input.keyboard.addCapture([
+    Phaser.Input.Keyboard.KeyCodes.UP,
+    Phaser.Input.Keyboard.KeyCodes.DOWN,
+    Phaser.Input.Keyboard.KeyCodes.LEFT,
+    Phaser.Input.Keyboard.KeyCodes.RIGHT,
+    Phaser.Input.Keyboard.KeyCodes.SPACE,
+    Phaser.Input.Keyboard.KeyCodes.W,
+    Phaser.Input.Keyboard.KeyCodes.A,
+    Phaser.Input.Keyboard.KeyCodes.S,
+    Phaser.Input.Keyboard.KeyCodes.D
+  ]);
+}
+
+
     const manifestRaw = this.cache.json.get('mapManifest');
 
-    // Manifest can be either:
-    //  - an array like ["map1.json","pokecenter_interior.json"]
-    //  - an object like { "maps": ["map1","pokecenter_interior"] }
     let manifestFiles = [];
     if (Array.isArray(manifestRaw)) {
-      manifestFiles = manifestRaw.slice(); // copy
+      manifestFiles = manifestRaw.slice();
     } else if (manifestRaw && Array.isArray(manifestRaw.maps)) {
       manifestFiles = manifestRaw.maps.slice();
     } else {
       console.warn('Map manifest missing or invalid — falling back to ["map1"]');
-      manifestFiles = ['map1']; // no extension — we normalize below
+      manifestFiles = ['map1'];
     }
 
-    // Normalize entries: ensure each entry is a filename (with extension) and compute keys
-    // We'll queue loads using keys without extension (e.g., 'map1') so cache key is predictable.
-    this._manifestKeys = []; // store keys we requested
+    // Normalize entries and queue map JSON loads
+    this._manifestKeys = [];
     manifestFiles.forEach(entry => {
       if (!entry) return;
       let filename = String(entry);
-      // If user provided e.g. "map1" (no extension), add .json for path; if they provided "map1.json", keep it.
       const hasExt = filename.toLowerCase().endsWith('.json');
       const key = hasExt ? filename.slice(0, -5) : filename;
-      // IMPORTANT: index.html is in src/, so relative path to assets is ../assets
       const path = hasExt ? `../assets/maps/${filename}` : `../assets/maps/${key}.json`;
       this.load.json(key, path);
       this._manifestKeys.push(key);
     });
 
-    // Create renderer, player and mapLoader early (player must exist for physics callbacks to attach)
+    // Core systems
     this.renderer = new Renderer(this);
     this.player = new Player(this, 100, 100);
     this.inventory = [];
     this.mapLoader = new MapLoader(this, this.renderer);
 
-    // Object interactions registry (add more functions here)
+    // Object interactions registry
     this.objectInteractions = {
       sayHello: (body, scene, player) => {
         const msg = body.mapData?.text || "Hello!";
@@ -71,7 +81,6 @@ class MainScene extends Phaser.Scene {
         const name = body.mapData?.name || "Mysterious Item";
         scene.inventory.push(name);
         scene.showDialog(`Picked up: ${name}`);
-        // destroy both body and any visual linked to it (mapLoader cleans visuals)
         body.destroy();
       },
       goToBuilding: (body, scene, player) => {
@@ -95,12 +104,14 @@ class MainScene extends Phaser.Scene {
       }
     };
 
-    // small dialog helper
-    this.dialogText = null;
+    // Dialog helper
     this.showDialog = (text) => {
       if (this.dialogText) this.dialogText.destroy();
       this.dialogText = this.add.text(this.player.sprite.x, this.player.sprite.y - 60, text, {
-        fontSize: '14px', fill: '#fff', backgroundColor: '#000', padding: { x: 6, y: 4 }
+        fontSize: '14px',
+        color: '#ffffff',
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        padding: { x: 8, y: 6 }
       }).setOrigin(0.5).setDepth(2000);
       this.time.delayedCall(1800, () => {
         if (this.dialogText) {
@@ -110,15 +121,20 @@ class MainScene extends Phaser.Scene {
       });
     };
 
-    // When all queued map JSON files finish loading:
-    this.load.once('complete', () => {
-      // choose starting map key: prefer 'map1' if present, else first manifest key
-      const startingKey = this._manifestKeys.includes('map1') ? 'map1' : (this._manifestKeys[0] || 'map1');
+    // Interaction hint UI
+    this.hintText = this.add.text(0, 0, 'Press SPACE to interact', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      padding: { x: 6, y: 4 }
+    }).setOrigin(0.5).setDepth(2000).setVisible(false);
 
-      // load the starting map (mapLoader will position player / set bounds)
+    // When maps finish preloading, start with preferred map
+    this.load.once('complete', () => {
+      const startingKey = this._manifestKeys.includes('map1') ? 'map1' : (this._manifestKeys[0] || 'map1');
       this.mapLoader.loadMap(startingKey);
 
-      // Create camera controller now that world bounds are set
+      // Create camera controller after bounds known
       this.cameraController = new CameraController(
         this,
         this.player.sprite,
@@ -127,17 +143,36 @@ class MainScene extends Phaser.Scene {
       );
     });
 
-    // start queued map loading (this triggers the 'complete' event when done)
+    // start queued loads
     this.load.start();
+
+    // Pause/Resume on tab visibility to save battery
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.scene.pause();
+      else this.scene.resume();
+    });
   }
 
   update() {
-    // only allow updates once a map is loaded
     if (this.mapLoader && this.mapLoader.currentMap) {
       this.player.update();
+
+      // Place hint text near player if something is nearby
+      if (this.player.nearbyObject) {
+        this.hintText.setPosition(this.player.sprite.x, this.player.sprite.y - 40);
+        this.hintText.setVisible(true);
+      } else {
+        this.hintText.setVisible(false);
+      }
+
       if (Phaser.Input.Keyboard.JustDown(this.player.keys.SPACE)) {
         this.player.interact();
       }
+    }
+
+    // Keep dialog above player
+    if (this.dialogText) {
+      this.dialogText.setPosition(this.player.sprite.x, this.player.sprite.y - 60);
     }
   }
 }
@@ -148,7 +183,11 @@ const config = {
   height: 540,
   backgroundColor: '#000',
   parent: 'game-container',
-  physics: { default: 'arcade', arcade: { debug: false } },
+  pixelArt: true,
+  physics: {
+    default: 'arcade',
+    arcade: { debug: false, gravity: { y: 0 } }
+  },
   scene: [MainScene]
 };
 
