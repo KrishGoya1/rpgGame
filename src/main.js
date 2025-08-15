@@ -2,6 +2,7 @@ import { Renderer } from './renderer.js';
 import { Player } from './player.js';
 import { CameraController } from './camera.js';
 import { MapLoader } from './mapLoader.js';
+import { Inventory } from './inventory.js'; // fixed import path
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -12,6 +13,7 @@ class MainScene extends Phaser.Scene {
     this.hintText = null;
     this.dialogText = null;
     this.removedObjectIds = new Set(); // Track removed objects
+    this.inventory = null; // will be initialized in create()
   }
 
   preload() {
@@ -37,6 +39,9 @@ class MainScene extends Phaser.Scene {
       ]);
     }
 
+    // Initialize inventory
+    this.inventory = new Inventory(this);
+
     const manifestRaw = this.cache.json.get('mapManifest');
     let manifestFiles = [];
     if (Array.isArray(manifestRaw)) {
@@ -61,7 +66,6 @@ class MainScene extends Phaser.Scene {
 
     this.renderer = new Renderer(this);
     this.player = new Player(this, 100, 100);
-    this.inventory = [];
     this.mapLoader = new MapLoader(this, this.renderer);
 
     this.objectInteractions = {
@@ -71,7 +75,7 @@ class MainScene extends Phaser.Scene {
       },
       giveItem: (body, scene, player) => {
         const name = body.mapData?.name || "Mysterious Item";
-        scene.inventory.push(name);
+        scene.inventory.addItem(name, 1); // now handled by Inventory class
         scene.showDialog(`Picked up: ${name}`);
         if (body.mapData?.id) {
           scene.removedObjectIds.add(body.mapData.id);
@@ -145,6 +149,7 @@ class MainScene extends Phaser.Scene {
   update() {
     if (this.mapLoader && this.mapLoader.currentMap) {
       this.player.update();
+      this.inventory.update();
 
       // Feet-based depth sorting
       this.player.sprite.setDepth(this.player.sprite.y + (this.player.sprite.displayHeight / 2));
