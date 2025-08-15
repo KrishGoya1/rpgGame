@@ -13,7 +13,8 @@ class MainScene extends Phaser.Scene {
   preload() {
     // load manifest (manifest can be either an array ["map1.json", ...]
     // or an object { "maps": ["map1", ...] } — we handle both in create()
-    this.load.json('mapManifest', 'assets/maps/index.json');
+    // === NOTE: index.html is inside src/, maps folder is ../assets/maps
+    this.load.json('mapManifest', '../assets/maps/index.json');
 
     // placeholder player texture
     this.add.graphics()
@@ -36,7 +37,7 @@ class MainScene extends Phaser.Scene {
       manifestFiles = manifestRaw.maps.slice();
     } else {
       console.warn('Map manifest missing or invalid — falling back to ["map1"]');
-      manifestFiles = ['map1.json'];
+      manifestFiles = ['map1']; // no extension — we normalize below
     }
 
     // Normalize entries: ensure each entry is a filename (with extension) and compute keys
@@ -48,7 +49,8 @@ class MainScene extends Phaser.Scene {
       // If user provided e.g. "map1" (no extension), add .json for path; if they provided "map1.json", keep it.
       const hasExt = filename.toLowerCase().endsWith('.json');
       const key = hasExt ? filename.slice(0, -5) : filename;
-      const path = hasExt ? `assets/maps/${filename}` : `assets/maps/${key}.json`;
+      // IMPORTANT: index.html is in src/, so relative path to assets is ../assets
+      const path = hasExt ? `../assets/maps/${filename}` : `../assets/maps/${key}.json`;
       this.load.json(key, path);
       this._manifestKeys.push(key);
     });

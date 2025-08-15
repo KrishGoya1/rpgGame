@@ -3,255 +3,32 @@
   "width": 40,
   "height": 30,
   "objects": [
-    {
-      "type": "path",
-      "x": 0,
-      "y": 15,
-      "width": 40,
-      "height": 3,
-      "solid": false
-    },
-    {
-      "type": "path",
-      "x": 19,
-      "y": 0,
-      "width": 3,
-      "height": 30,
-      "solid": false
-    },
+    { "id": "spawn_point", "type": "spawn", "x": 20, "y": 15, "width": 1, "height": 1 },
 
-    {
-      "type": "building",
-      "id": "building_pokecenter",
-      "x": 5,
-      "y": 6,
-      "width": 8,
-      "height": 6,
-      "solid": true
-    },
-    {
-      "type": "entrance",
-      "id": "pokecenter_entrance",
-      "x": 8,
-      "y": 12,
-      "width": 2,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "goToBuilding",
-      "targetMap": "pokecenter_interior",
-      "targetId": "pokecenter_exit"
-    },
+    { "id": "blacksmith", "type": "building", "name": "Blacksmith", "x": 10, "y": 13, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "blacksmith_interior", "targetId": "main_door" },
+    { "id": "alchemist", "type": "building", "name": "Alchemist", "x": 27, "y": 13, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "alchemist_interior", "targetId": "main_door" },
+    { "id": "inn", "type": "building", "name": "Town Inn", "x": 6, "y": 18, "width": 4, "height": 3, "solid": true, "interactable": true, "targetMap": "inn_interior", "targetId": "main_door" },
+    { "id": "guild_hall", "type": "building", "name": "Guild Hall", "x": 30, "y": 18, "width": 5, "height": 4, "solid": true, "interactable": true, "targetMap": "guild_interior", "targetId": "main_door" },
+    { "id": "training_grounds", "type": "building", "name": "Training Grounds", "x": 5, "y": 6, "width": 4, "height": 4, "solid": true, "interactable": true, "targetMap": "training_interior", "targetId": "main_door" },
+    { "id": "residential_1", "type": "building", "name": "Residential House 1", "x": 14, "y": 23, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "house1_interior", "targetId": "main_door" },
+    { "id": "residential_2", "type": "building", "name": "Residential House 2", "x": 20, "y": 23, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "house2_interior", "targetId": "main_door" },
+    { "id": "hidden_alley", "type": "building", "name": "Hidden Alley", "x": 36, "y": 19, "width": 2, "height": 2, "solid": true, "interactable": true, "targetMap": "alley_interior", "targetId": "main_door" },
 
-    {
-      "type": "building",
-      "id": "building_pokemart",
-      "x": 28,
-      "y": 6,
-      "width": 7,
-      "height": 5,
-      "solid": true
-    },
-    {
-      "type": "entrance",
-      "id": "pokemart_entrance",
-      "x": 30,
-      "y": 11,
-      "width": 2,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "goToBuilding",
-      "targetMap": "pokemart_interior",
-      "targetId": "pokemart_exit"
-    },
+    { "id": "npc_plaza_1", "type": "npc", "x": 19, "y": 14, "width": 1, "height": 1, "interactable": true, "text": "The fountain has been here since the town was founded." },
+    { "id": "npc_plaza_2", "type": "npc", "x": 21, "y": 16, "width": 1, "height": 1, "interactable": true, "text": "I hear the Guild is looking for brave adventurers." },
+    { "id": "npc_blacksmith", "type": "npc", "x": 11, "y": 12, "width": 1, "height": 1, "interactable": true, "text": "My blades are the sharpest east of the mountains." },
+    { "id": "npc_alchemist", "type": "npc", "x": 28, "y": 12, "width": 1, "height": 1, "interactable": true, "text": "Potions, tonics, and more — brewed fresh daily!" },
+    { "id": "npc_innkeeper", "type": "npc", "x": 7, "y": 17, "width": 1, "height": 1, "interactable": true, "text": "A warm bed and a hot meal, traveler?" },
+    { "id": "npc_guild", "type": "npc", "x": 32, "y": 17, "width": 1, "height": 1, "interactable": true, "text": "Welcome to the Guild. Looking for work?" },
+    { "id": "npc_trainer", "type": "npc", "x": 6, "y": 5, "width": 1, "height": 1, "interactable": true, "text": "Care for a sparring session?" },
+    { "id": "npc_alley", "type": "npc", "x": 37, "y": 18, "width": 1, "height": 1, "interactable": true, "text": "Keep your voice down... I have rare goods for sale." },
 
-    {
-      "type": "building",
-      "id": "building_house1",
-      "x": 5,
-      "y": 20,
-      "width": 6,
-      "height": 4,
-      "solid": true
-    },
-    {
-      "type": "entrance",
-      "id": "house1_entrance",
-      "x": 7,
-      "y": 24,
-      "width": 2,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "goToBuilding",
-      "targetMap": "house1_interior",
-      "targetId": "house1_exit"
-    },
+    { "id": "north_exit", "type": "entrance", "x": 19, "y": 0, "width": 2, "height": 1, "interactable": true, "targetMap": "forest_map", "targetId": "south_entry" },
+    { "id": "south_exit", "type": "entrance", "x": 19, "y": 29, "width": 2, "height": 1, "interactable": true, "targetMap": "harbor_map", "targetId": "north_entry" },
 
-    {
-      "type": "building",
-      "id": "building_house2",
-      "x": 29,
-      "y": 20,
-      "width": 6,
-      "height": 4,
-      "solid": true
-    },
-    {
-      "type": "entrance",
-      "id": "house2_entrance",
-      "x": 31,
-      "y": 24,
-      "width": 2,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "goToBuilding",
-      "targetMap": "house2_interior",
-      "targetId": "house2_exit"
-    },
-
-    {
-      "type": "tree",
-      "id": "tree_oak",
-      "x": 1,
-      "y": 1,
-      "width": 3,
-      "height": 3,
-      "solid": true
-    },
-    {
-      "type": "tree",
-      "id": "tree_oak",
-      "x": 36,
-      "y": 1,
-      "width": 3,
-      "height": 3,
-      "solid": true
-    },
-    {
-      "type": "tree",
-      "id": "tree_oak",
-      "x": 1,
-      "y": 26,
-      "width": 3,
-      "height": 3,
-      "solid": true
-    },
-    {
-      "type": "tree",
-      "id": "tree_oak",
-      "x": 36,
-      "y": 26,
-      "width": 3,
-      "height": 3,
-      "solid": true
-    },
-
-    {
-      "type": "flowers",
-      "id": "flowers_red",
-      "x": 10,
-      "y": 25,
-      "width": 4,
-      "height": 1,
-      "solid": false
-    },
-    {
-      "type": "bench",
-      "id": "bench_wood",
-      "x": 18,
-      "y": 20,
-      "width": 2,
-      "height": 1,
-      "solid": true
-    },
-
-    {
-      "type": "npc",
-      "id": "npc_oldman",
-      "x": 8,
-      "y": 13,
-      "width": 1,
-      "height": 1,
-      "solid": true,
-      "interactable": true,
-      "interactFunction": "sayHello",
-      "text": "My Pokémon are ready for battle! Did you know Rustboro City has the Devon Corporation?"
-    },
-    {
-      "type": "npc",
-      "id": "npc_woman",
-      "x": 30,
-      "y": 13,
-      "width": 1,
-      "height": 1,
-      "solid": true,
-      "interactable": true,
-      "interactFunction": "sayHello",
-      "text": "Welcome to Pinecrest Town! We're just west of Route 104, similar to how Rustboro City is positioned in Hoenn."
-    },
-    {
-      "type": "npc",
-      "id": "npc_boy",
-      "x": 20,
-      "y": 25,
-      "width": 1,
-      "height": 1,
-      "solid": true,
-      "interactable": true,
-      "interactFunction": "sayHello",
-      "text": "This town reminds me of Fallarbor Town with its peaceful atmosphere."
-    },
-    {
-      "type": "npc",
-      "id": "npc_girl",
-      "x": 15,
-      "y": 10,
-      "width": 1,
-      "height": 1,
-      "solid": true,
-      "interactable": true,
-      "interactFunction": "sayHello",
-      "text": "Have you visited Lilycove City? Their department store is amazing!"
-    },
-
-    {
-      "type": "sign",
-      "id": "sign_town",
-      "x": 20,
-      "y": 28,
-      "width": 1,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "readSign",
-      "text": "Pinecrest Town\nPopulation: 32\n\"A peaceful town nestled between mountains\""
-    },
-    {
-      "type": "item",
-      "id": "item_potion",
-      "x": 22,
-      "y": 18,
-      "width": 1,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "giveItem",
-      "name": "Potion"
-    },
-    {
-      "type": "item",
-      "id": "item_pokeball",
-      "x": 12,
-      "y": 8,
-      "width": 1,
-      "height": 1,
-      "solid": false,
-      "interactable": true,
-      "interactFunction": "giveItem",
-      "name": "Poké Ball"
-    }
+    { "id": "border_top", "type": "worldBorder", "x": 0, "y": 0, "width": 40, "height": 1, "solid": true },
+    { "id": "border_bottom", "type": "worldBorder", "x": 0, "y": 29, "width": 40, "height": 1, "solid": true },
+    { "id": "border_left", "type": "worldBorder", "x": 0, "y": 0, "width": 1, "height": 30, "solid": true },
+    { "id": "border_right", "type": "worldBorder", "x": 39, "y": 0, "width": 1, "height": 30, "solid": true }
   ]
 }

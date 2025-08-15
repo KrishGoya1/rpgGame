@@ -1,0 +1,30 @@
+{
+  "tileSize": 50,
+  "width": 12,
+  "height": 10,
+  "objects": [
+    { "id": "main_door", "type": "spawn", "x": 6, "y": 9, "width": 1, "height": 1 },
+
+    { "id": "exit_to_town", "type": "entrance", "x": 5, "y": 9, "width": 2, "height": 1, "interactable": true, "targetMap": "map1", "targetId": "blacksmith" },
+
+    { "id": "npc_blacksmith", "type": "npc", "x": 6, "y": 4, "width": 1, "height": 1, "interactable": true, "text": "Need a blade? Or perhaps you wish to forge your own?" },
+
+    { "id": "npc_apprentice", "type": "npc", "x": 3, "y": 6, "width": 1, "height": 1, "interactable": true, "text": "Master says my hammer swing is too slow..." },
+
+    { "id": "forge", "type": "item", "x": 2, "y": 2, "width": 2, "height": 1, "solid": true },
+
+    { "id": "anvil", "type": "item", "x": 5, "y": 3, "width": 1, "height": 1, "solid": true },
+
+    { "id": "rack_1", "type": "item", "x": 9, "y": 2, "width": 1, "height": 2, "solid": true },
+    { "id": "rack_2", "type": "item", "x": 10, "y": 2, "width": 1, "height": 2, "solid": true },
+
+    { "id": "work_table", "type": "item", "x": 4, "y": 5, "width": 2, "height": 1, "solid": true },
+
+    { "id": "shop_counter", "type": "item", "x": 5, "y": 5, "width": 3, "height": 1, "solid": true, "interactable": true, "text": "Blacksmith: Browse my wares, adventurer." },
+
+    { "id": "border_top", "type": "worldBorder", "x": 0, "y": 0, "width": 12, "height": 1, "solid": true },
+    { "id": "border_bottom", "type": "worldBorder", "x": 0, "y": 9, "width": 12, "height": 1, "solid": true },
+    { "id": "border_left", "type": "worldBorder", "x": 0, "y": 0, "width": 1, "height": 10, "solid": true },
+    { "id": "border_right", "type": "worldBorder", "x": 11, "y": 0, "width": 1, "height": 10, "solid": true }
+  ]
+}

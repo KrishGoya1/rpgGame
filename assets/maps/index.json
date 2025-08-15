@@ -1,9 +1,7 @@
 {
   "maps": [
     "map1",
-    "pokecenter_interior",
-    "pokemart_interior",
-    "house1_interior",
-    "house2_interior"
+    "blacksmith_interior",
+    ""
   ]
 }
