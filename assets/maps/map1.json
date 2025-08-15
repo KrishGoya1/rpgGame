@@ -1,34 +1,79 @@
 {
   "tileSize": 50,
-  "width": 40,
-  "height": 30,
+  "width": 12,
+  "height": 8,
   "objects": [
-    { "id": "spawn_point", "type": "spawn", "x": 20, "y": 15, "width": 1, "height": 1 },
-
-    { "id": "blacksmith", "type": "building", "name": "Blacksmith", "x": 10, "y": 13, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "blacksmith_interior", "targetId": "main_door" },
-    { "id": "alchemist", "type": "building", "name": "Alchemist", "x": 27, "y": 13, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "alchemist_interior", "targetId": "main_door" },
-    { "id": "inn", "type": "building", "name": "Town Inn", "x": 6, "y": 18, "width": 4, "height": 3, "solid": true, "interactable": true, "targetMap": "inn_interior", "targetId": "main_door" },
-    { "id": "guild_hall", "type": "building", "name": "Guild Hall", "x": 30, "y": 18, "width": 5, "height": 4, "solid": true, "interactable": true, "targetMap": "guild_interior", "targetId": "main_door" },
-    { "id": "training_grounds", "type": "building", "name": "Training Grounds", "x": 5, "y": 6, "width": 4, "height": 4, "solid": true, "interactable": true, "targetMap": "training_interior", "targetId": "main_door" },
-    { "id": "residential_1", "type": "building", "name": "Residential House 1", "x": 14, "y": 23, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "house1_interior", "targetId": "main_door" },
-    { "id": "residential_2", "type": "building", "name": "Residential House 2", "x": 20, "y": 23, "width": 3, "height": 3, "solid": true, "interactable": true, "targetMap": "house2_interior", "targetId": "main_door" },
-    { "id": "hidden_alley", "type": "building", "name": "Hidden Alley", "x": 36, "y": 19, "width": 2, "height": 2, "solid": true, "interactable": true, "targetMap": "alley_interior", "targetId": "main_door" },
-
-    { "id": "npc_plaza_1", "type": "npc", "x": 19, "y": 14, "width": 1, "height": 1, "interactable": true, "text": "The fountain has been here since the town was founded." },
-    { "id": "npc_plaza_2", "type": "npc", "x": 21, "y": 16, "width": 1, "height": 1, "interactable": true, "text": "I hear the Guild is looking for brave adventurers." },
-    { "id": "npc_blacksmith", "type": "npc", "x": 11, "y": 12, "width": 1, "height": 1, "interactable": true, "text": "My blades are the sharpest east of the mountains." },
-    { "id": "npc_alchemist", "type": "npc", "x": 28, "y": 12, "width": 1, "height": 1, "interactable": true, "text": "Potions, tonics, and more — brewed fresh daily!" },
-    { "id": "npc_innkeeper", "type": "npc", "x": 7, "y": 17, "width": 1, "height": 1, "interactable": true, "text": "A warm bed and a hot meal, traveler?" },
-    { "id": "npc_guild", "type": "npc", "x": 32, "y": 17, "width": 1, "height": 1, "interactable": true, "text": "Welcome to the Guild. Looking for work?" },
-    { "id": "npc_trainer", "type": "npc", "x": 6, "y": 5, "width": 1, "height": 1, "interactable": true, "text": "Care for a sparring session?" },
-    { "id": "npc_alley", "type": "npc", "x": 37, "y": 18, "width": 1, "height": 1, "interactable": true, "text": "Keep your voice down... I have rare goods for sale." },
-
-    { "id": "north_exit", "type": "entrance", "x": 19, "y": 0, "width": 2, "height": 1, "interactable": true, "targetMap": "forest_map", "targetId": "south_entry" },
-    { "id": "south_exit", "type": "entrance", "x": 19, "y": 29, "width": 2, "height": 1, "interactable": true, "targetMap": "harbor_map", "targetId": "north_entry" },
-
-    { "id": "border_top", "type": "worldBorder", "x": 0, "y": 0, "width": 40, "height": 1, "solid": true },
-    { "id": "border_bottom", "type": "worldBorder", "x": 0, "y": 29, "width": 40, "height": 1, "solid": true },
-    { "id": "border_left", "type": "worldBorder", "x": 0, "y": 0, "width": 1, "height": 30, "solid": true },
-    { "id": "border_right", "type": "worldBorder", "x": 39, "y": 0, "width": 1, "height": 30, "solid": true }
+    {
+      "type": "spawn",
+      "x": 2,
+      "y": 2
+    },
+    {
+      "id": "npc1",
+      "type": "npc",
+      "x": 4,
+      "y": 2,
+      "width": 1,
+      "height": 1,
+      "interactable": true,
+      "interactFunction": "sayHello",
+      "text": "Hello traveler! Welcome to the test map."
+    },
+    {
+      "id": "item1",
+      "type": "item",
+      "name": "Test Sword",
+      "x": 6,
+      "y": 2,
+      "width": 1,
+      "height": 1,
+      "interactable": true,
+      "interactFunction": "giveItem"
+    },
+    {
+      "id": "buildingEntrance1",
+      "type": "entrance",
+      "x": 8,
+      "y": 2,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "building1",
+      "targetId": "buildingExit1"
+    },
+    {
+      "type": "wall",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 1,
+      "solid": true
+    },
+    {
+      "type": "wall",
+      "x": 0,
+      "y": 7,
+      "width": 12,
+      "height": 1,
+      "solid": true
+    },
+    {
+      "type": "wall",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 8,
+      "solid": true
+    },
+    {
+      "type": "wall",
+      "x": 11,
+      "y": 0,
+      "width": 1,
+      "height": 8,
+      "solid": true
+    }
   ]
 }

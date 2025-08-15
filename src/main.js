@@ -11,13 +11,11 @@ class MainScene extends Phaser.Scene {
     this._manifestKeys = [];
     this.hintText = null;
     this.dialogText = null;
+    this.removedObjectIds = new Set(); // Track removed objects
   }
 
   preload() {
-    // Load map manifest (see create() for flexible formats)
     this.load.json('mapManifest', '../assets/maps/index.json');
-
-    // Placeholder player texture
     this.add.graphics()
       .fillStyle(0xffff00, 1)
       .fillRect(0, 0, 40, 40)
@@ -25,24 +23,21 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
-    // Improve default input experience
     if (this.input.keyboard) {
-  this.input.keyboard.addCapture([
-    Phaser.Input.Keyboard.KeyCodes.UP,
-    Phaser.Input.Keyboard.KeyCodes.DOWN,
-    Phaser.Input.Keyboard.KeyCodes.LEFT,
-    Phaser.Input.Keyboard.KeyCodes.RIGHT,
-    Phaser.Input.Keyboard.KeyCodes.SPACE,
-    Phaser.Input.Keyboard.KeyCodes.W,
-    Phaser.Input.Keyboard.KeyCodes.A,
-    Phaser.Input.Keyboard.KeyCodes.S,
-    Phaser.Input.Keyboard.KeyCodes.D
-  ]);
-}
-
+      this.input.keyboard.addCapture([
+        Phaser.Input.Keyboard.KeyCodes.UP,
+        Phaser.Input.Keyboard.KeyCodes.DOWN,
+        Phaser.Input.Keyboard.KeyCodes.LEFT,
+        Phaser.Input.Keyboard.KeyCodes.RIGHT,
+        Phaser.Input.Keyboard.KeyCodes.SPACE,
+        Phaser.Input.Keyboard.KeyCodes.W,
+        Phaser.Input.Keyboard.KeyCodes.A,
+        Phaser.Input.Keyboard.KeyCodes.S,
+        Phaser.Input.Keyboard.KeyCodes.D
+      ]);
+    }
 
     const manifestRaw = this.cache.json.get('mapManifest');
-
     let manifestFiles = [];
     if (Array.isArray(manifestRaw)) {
       manifestFiles = manifestRaw.slice();
@@ -53,7 +48,6 @@ class MainScene extends Phaser.Scene {
       manifestFiles = ['map1'];
     }
 
-    // Normalize entries and queue map JSON loads
     this._manifestKeys = [];
     manifestFiles.forEach(entry => {
       if (!entry) return;
@@ -65,13 +59,11 @@ class MainScene extends Phaser.Scene {
       this._manifestKeys.push(key);
     });
 
-    // Core systems
     this.renderer = new Renderer(this);
     this.player = new Player(this, 100, 100);
     this.inventory = [];
     this.mapLoader = new MapLoader(this, this.renderer);
 
-    // Object interactions registry
     this.objectInteractions = {
       sayHello: (body, scene, player) => {
         const msg = body.mapData?.text || "Hello!";
@@ -81,6 +73,9 @@ class MainScene extends Phaser.Scene {
         const name = body.mapData?.name || "Mysterious Item";
         scene.inventory.push(name);
         scene.showDialog(`Picked up: ${name}`);
+        if (body.mapData?.id) {
+          scene.removedObjectIds.add(body.mapData.id);
+        }
         body.destroy();
       },
       goToBuilding: (body, scene, player) => {
@@ -104,7 +99,6 @@ class MainScene extends Phaser.Scene {
       }
     };
 
-    // Dialog helper
     this.showDialog = (text) => {
       if (this.dialogText) this.dialogText.destroy();
       this.dialogText = this.add.text(this.player.sprite.x, this.player.sprite.y - 60, text, {
@@ -121,7 +115,6 @@ class MainScene extends Phaser.Scene {
       });
     };
 
-    // Interaction hint UI
     this.hintText = this.add.text(0, 0, 'Press SPACE to interact', {
       fontSize: '12px',
       color: '#ffffff',
@@ -129,12 +122,10 @@ class MainScene extends Phaser.Scene {
       padding: { x: 6, y: 4 }
     }).setOrigin(0.5).setDepth(2000).setVisible(false);
 
-    // When maps finish preloading, start with preferred map
     this.load.once('complete', () => {
       const startingKey = this._manifestKeys.includes('map1') ? 'map1' : (this._manifestKeys[0] || 'map1');
       this.mapLoader.loadMap(startingKey);
 
-      // Create camera controller after bounds known
       this.cameraController = new CameraController(
         this,
         this.player.sprite,
@@ -143,10 +134,8 @@ class MainScene extends Phaser.Scene {
       );
     });
 
-    // start queued loads
     this.load.start();
 
-    // Pause/Resume on tab visibility to save battery
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) this.scene.pause();
       else this.scene.resume();
@@ -157,7 +146,9 @@ class MainScene extends Phaser.Scene {
     if (this.mapLoader && this.mapLoader.currentMap) {
       this.player.update();
 
-      // Place hint text near player if something is nearby
+      // Feet-based depth sorting
+      this.player.sprite.setDepth(this.player.sprite.y + (this.player.sprite.displayHeight / 2));
+
       if (this.player.nearbyObject) {
         this.hintText.setPosition(this.player.sprite.x, this.player.sprite.y - 40);
         this.hintText.setVisible(true);
@@ -170,7 +161,6 @@ class MainScene extends Phaser.Scene {
       }
     }
 
-    // Keep dialog above player
     if (this.dialogText) {
       this.dialogText.setPosition(this.player.sprite.x, this.player.sprite.y - 60);
     }

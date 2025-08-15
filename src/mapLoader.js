@@ -8,27 +8,18 @@ export class MapLoader {
     this.interactiveObjects = [];
 
     this.typeColors = {
-      "item": 0xff0000,
-      "building": 0x0000ff,
-      "entrance": 0x00ff00,
-      "wall": 0xffffff,
-      "worldBorder": 0x000000
+      "item": 0xff0000,       // red
+      "building": 0x0000ff,   // blue
+      "entrance": 0x00ff00,   // green
+      "exit": 0x00cc99,       // teal
+      "npc": 0xffaa00,        // orange
+      "spawn": 0xffffff,      // white
+      "wall": 0x888888,       // gray
+      "worldBorder": 0x000000 // black
     };
 
     this.solidGroup = null;
     this.playerCollider = null;
-  }
-
-  loadManifest(manifestKey) {
-    const manifest = this.scene.cache.json.get(manifestKey);
-    if (!manifest || !manifest.maps) {
-      console.error("Map manifest missing or invalid");
-      return;
-    }
-    manifest.maps.forEach(mapName => {
-      this.scene.load.json(mapName, `../assets/maps/${mapName}.json`);
-    });
-    this.scene.load.start();
   }
 
   loadMap(mapName) {
@@ -42,20 +33,20 @@ export class MapLoader {
 
     this.tileSize = mapData.tileSize || 50;
     this.currentMap = mapName;
-
-    // Create fresh static group for colliders
     this.solidGroup = this.scene.physics.add.staticGroup();
 
     mapData.objects.forEach(obj => {
-      const sprite = this.createSpriteForObject(obj);
+      // Skip removed objects
+      if (obj.id && this.scene.removedObjectIds.has(obj.id)) {
+        return;
+      }
 
-      // Attach map data reference
+      const sprite = this.createSpriteForObject(obj);
       sprite.mapData = obj;
       sprite.setData && sprite.setData('mapData', obj);
 
       if (obj.solid) {
         this.scene.physics.add.existing(sprite, true);
-        // Ensure physics body matches visual size and is centered
         if (sprite.body && sprite.body.setSize) {
           sprite.body.setSize(sprite.displayWidth, sprite.displayHeight, true);
           sprite.body.updateFromGameObject?.();
@@ -67,12 +58,10 @@ export class MapLoader {
       }
     });
 
-    // Add collision so player can't go through solid objects
     if (this.solidGroup.getChildren().length > 0 && this.scene.player?.sprite) {
       this.playerCollider = this.scene.physics.add.collider(this.scene.player.sprite, this.solidGroup);
     }
 
-    // Spawn player
     let spawnPoint = mapData.objects.find(o => o.type === "spawn");
     if (this.scene.pendingEntranceId) {
       const match = mapData.objects.find(o => o.id === this.scene.pendingEntranceId);
@@ -86,7 +75,6 @@ export class MapLoader {
       );
     }
 
-    // Set world bounds
     const worldPxWidth = (mapData.width || 0) * this.tileSize;
     const worldPxHeight = (mapData.height || 0) * this.tileSize;
     this.scene.physics.world.setBounds(0, 0, worldPxWidth, worldPxHeight);
@@ -105,11 +93,10 @@ export class MapLoader {
     if (obj.type === "building") folder = "buildings";
     if (obj.type === "npc") folder = "npc";
     const idPart = (obj.id || obj.name || obj.type).toString().replace(/\s+/g, '_');
-    return `\${folder}_\${obj.type}_\${idPart}`;
+    return `${folder}_${obj.type}_${idPart}`;
   }
 
   createObjectSprite(obj, textureKey, color) {
-    // Ensure width/height are at least 1 tile
     const safeWidth = (obj.width || 1) * this.tileSize;
     const safeHeight = (obj.height || 1) * this.tileSize;
 
@@ -120,8 +107,7 @@ export class MapLoader {
     if (this.scene.textures.exists(textureKey)) {
       sprite = this.scene.add.image(centerX, centerY, textureKey).setDisplaySize(safeWidth, safeHeight);
     } else {
-      // Use a deterministic placeholder key to avoid leaking textures
-      const texKey = `placeholder_\${obj.type}_\${safeWidth}x\${safeHeight}`;
+      const texKey = `placeholder_${obj.type}_${safeWidth}x${safeHeight}`;
       if (!this.scene.textures.exists(texKey)) {
         const g = this.scene.add.graphics();
         g.fillStyle(color, 1);
@@ -132,22 +118,18 @@ export class MapLoader {
       sprite = this.scene.add.image(centerX, centerY, texKey);
     }
 
-    // Centered origin works best with physics sizing above
     sprite.setOrigin(0.5);
-    // Slight layering by Y for nicer overlap
-    sprite.setDepth(Math.floor(centerY));
-
+    // Feet-based depth (bottom edge of sprite)
+    sprite.setDepth(centerY + (safeHeight / 2));
     return sprite;
   }
 
   clearMap() {
-    // Destroy interactables
     this.interactiveObjects.forEach(obj => {
       if (obj && obj.destroy) obj.destroy();
     });
     this.interactiveObjects = [];
 
-    // Destroy solid group & collider from previous map
     if (this.playerCollider) {
       this.playerCollider.destroy();
       this.playerCollider = null;

@@ -1,0 +1,63 @@
+{
+  "tileSize": 50,
+  "width": 6,
+  "height": 6,
+  "objects": [
+    {
+      "id": "buildingExit1",
+      "type": "exit",
+      "x": 3,
+      "y": 5,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "interactable": true,
+      "interactFunction": "goToBuilding",
+      "targetMap": "map1",
+      "targetId": "buildingEntrance1"
+    },
+    {
+      "type": "npc",
+      "id": "npcInside",
+      "x": 3,
+      "y": 2,
+      "width": 1,
+      "height": 1,
+      "interactable": true,
+      "interactFunction": "sayHello",
+      "text": "Welcome to my humble home!"
+    },
+    {
+      "type": "wall",
+      "x": 0,
+      "y": 0,
+      "width": 6,
+      "height": 1,
+      "solid": true
+    },
+    {
+      "type": "wall",
+      "x": 0,
+      "y": 5,
+      "width": 6,
+      "height": 1,
+      "solid": true
+    },
+    {
+      "type": "wall",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 6,
+      "solid": true
+    },
+    {
+      "type": "wall",
+      "x": 5,
+      "y": 0,
+      "width": 1,
+      "height": 6,
+      "solid": true
+    }
+  ]
+}
