@@ -1,0 +1,98 @@
+{
+  "height": 10,
+  "width": 10,
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "version": "1.9",
+  "type": "map",
+  "layers": [
+    {
+      "type": "tilelayer",
+      "name": "Ground",
+      "width": 10,
+      "height": 10,
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "data": [
+        1,1,1,1,1,1,1,1,1,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,1,1,1,1,1,1,1,1,1
+      ]
+    },
+    {
+      "type": "tilelayer",
+      "name": "Walls",
+      "width": 10,
+      "height": 10,
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "data": [
+        0,0,0,0,0,0,0,0,0,0,
+        0,2,0,0,0,0,0,0,2,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,2,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,2,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,2,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0
+      ]
+    },
+    {
+      "type": "objectgroup",
+      "name": "Objects",
+      "objects": [
+        {
+          "id": 1,
+          "name": "PlayerSpawn",
+          "x": 64,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      ]
+    }
+  ],
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "tilesets": [
+  {
+    "firstgid": 1,
+    "name": "tiles",
+    "tilewidth": 32,
+    "tileheight": 32,
+    "tilecount": 3,
+    "columns": 3,
+    "image": "tiles.png",
+    "imagewidth": 96,
+    "imageheight": 32
+  }
+]
+,
+      "name": "tiles",
+      "tilewidth": 32,
+      "tileheight": 32,
+      "tilecount": 3,
+      "columns": 3,
+      "image": "tiles.png",
+      "imagewidth": 96,
+      "imageheight": 32
+    }
+  ]
+}

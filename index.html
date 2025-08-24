@@ -1,27 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>TDGTK</title>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
-      }
-      #game-container {
-        width: 100%;
-        height: 100%;
-      }
-      canvas {
-        display: block;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="game-container"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+  <style>
+    body { margin: 0; padding: 0; background: #111; }
+    canvas { display: block; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <!-- Just load main.js -->
+  <script type="module" src="./src/main.js"></script>
+</body>
 </html>
