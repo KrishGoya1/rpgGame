@@ -64,6 +64,24 @@
           "y": 64,
           "width": 32,
           "height": 32
+        },
+        {
+          "id": 2,
+          "name": "NPC",
+          "x": 200,
+          "y": 100,
+          "properties": [
+            {
+              "name": "dialogue",
+              "type": "string",
+              "value": "[\"Hello traveler!\",\"Be careful ahead...\",\"Good luck on your journey!\"]"
+            },
+            {
+              "name": "path",
+              "type": "string",
+              "value": "[{\"x\":200,\"y\":100},{\"x\":300,\"y\":100},{\"x\":300,\"y\":200},{\"x\":200,\"y\":200}]"
+            }
+          ]
         }
       ]
     }
@@ -71,20 +89,6 @@
   "tilesets": [
     {
       "firstgid": 1,
-      "tilesets": [
-  {
-    "firstgid": 1,
-    "name": "tiles",
-    "tilewidth": 32,
-    "tileheight": 32,
-    "tilecount": 3,
-    "columns": 3,
-    "image": "tiles.png",
-    "imagewidth": 96,
-    "imageheight": 32
-  }
-]
-,
       "name": "tiles",
       "tilewidth": 32,
       "tileheight": 32,
