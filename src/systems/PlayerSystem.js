@@ -58,13 +58,24 @@ export function createPlayer(scene, x, y) {
 
 export function handlePlayerMovement(scene, player, cursors, dialogueActive) {
     const speed = 150;
-    player.setVelocity(0);
+    let vx = 0;
+    let vy = 0;
 
     if (!dialogueActive) {
-        if (cursors.left.isDown) player.setVelocityX(-speed);
-        else if (cursors.right.isDown) player.setVelocityX(speed);
+        if (cursors.left.isDown) vx = -1;
+        else if (cursors.right.isDown) vx = 1;
 
-        if (cursors.up.isDown) player.setVelocityY(-speed);
-        else if (cursors.down.isDown) player.setVelocityY(speed);
+        if (cursors.up.isDown) vy = -1;
+        else if (cursors.down.isDown) vy = 1;
     }
+
+    // Normalize diagonal movement
+    if (vx !== 0 || vy !== 0) {
+        const len = Math.sqrt(vx * vx + vy * vy);
+        vx = (vx / len) * speed;
+        vy = (vy / len) * speed;
+    }
+
+    player.setVelocity(vx, vy);
 }
+
