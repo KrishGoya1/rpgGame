@@ -66,8 +66,8 @@
           "height": 32
         },
         {
-  "id": 1,
-  "name": "Guard",
+  "id": 101,
+  "name": "npc_guard",
   "type": "NPC",
   "x": 200,
   "y": 150,
@@ -87,7 +87,7 @@
     {
       "name": "quest",
       "type": "string",
-      "value": "{ \"id\": \"guard_quest_1\", \"title\": \"Find the Lost Gun\", \"description\": \"The guard lost his gun in the forest. Find it and return it to him.\", \"requiredItem\": \"gun\", \"rewardItem\": \"pass\", \"completedDialogue\": [\"Ah, you found my gun!\", \"Here, take this pass. You may proceed.\"] }"
+      "value": "{\"id\":\"guard_quest_1\",\"title\":\"Find the Lost Gun\",\"description\":\"Find the guard's gun in the forest and return it.\",\"type\":\"collect\",\"target\":\"gun\",\"count\":1,\"reward\":{\"items\":[{\"id\":\"pass\",\"quantity\":1}]},\"completedDialogue\":[\"Ah, you found my gun!\",\"Here, take this pass. You may proceed.\"]}"
     }
   ]
 }

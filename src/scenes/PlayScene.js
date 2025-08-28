@@ -4,7 +4,10 @@ import { createPlayer, handlePlayerMovement } from '../systems/PlayerSystem.js';
 import { createNpcs, updateNpcPatrol, getNearbyNpc } from '../systems/NpcSystem.js';
 import { createDialogue, startDialogue, advanceDialogue } from '../systems/DialogueSystem.js';
 
-import QuestSystem from '../systems/QuestSystem.js';
+import InventorySystem from '../systems/InventorySystem.js';
+import InventoryUI from '../systems/InventoryUI.js';
+import { spawnCollectible } from '../systems/collectible.js';
+import QuestSystem from '../systems/QuestSystem.js'; // your
 import QuestLogUI from '../systems/QuestLogUI.js';
 
 export default class PlayScene extends Phaser.Scene {
@@ -28,6 +31,13 @@ export default class PlayScene extends Phaser.Scene {
     this.player = createPlayer(this, spawnX, spawnY);
     this.physics.add.collider(this.player, wallsLayer);
 
+    //INVENTORY
+    this.inventory = new InventorySystem(this);
+    this.inventoryUI = new InventoryUI(this, this.inventory);
+    spawnCollectible(this, 360, 220, 'gun', 'gun', this.inventory, this.questSystem, { soundKey: null });
+
+
+
     // NPCs
     this.npcs = createNpcs(this, map);
     this.physics.add.collider(this.npcs, wallsLayer);
@@ -41,7 +51,7 @@ export default class PlayScene extends Phaser.Scene {
     this.currentNpc = null;
 
     // QUEST SYSTEM + UI
-    this.questSystem = new QuestSystem(this);
+    this.questSystem = new QuestSystem(this,this.inventory);
     this.questLog = new QuestLogUI(this, this.questSystem);
     this.questLog.update();
 
@@ -63,6 +73,8 @@ export default class PlayScene extends Phaser.Scene {
     // Debug hint
     this.add.text(8, 8, 'WASD/Arrows: Move · E: interact · SPACE: advance dialogue · Y/N: accept/decline quest', { font: '12px monospace', fill: '#fff' }).setScrollFactor(0);
   }
+
+  
 
   update(time, delta) {
     // player movement (respects scene.dialogueActive)
