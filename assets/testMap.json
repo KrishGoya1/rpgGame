@@ -66,6 +66,33 @@
           "height": 32
         },
         {
+  "id": 1,
+  "name": "Guard",
+  "type": "NPC",
+  "x": 200,
+  "y": 150,
+  "width": 32,
+  "height": 32,
+  "properties": [
+    {
+      "name": "sprite",
+      "type": "string",
+      "value": "npc_guard"
+    },
+    {
+      "name": "dialogue",
+      "type": "string",
+      "value": "[\"Halt! You cannot pass without authorization...\", \"But perhaps you can help me...\", \"I lost my gun somewhere in the forest.\", \"Bring it to me and I’ll give you a pass.\"]"
+    },
+    {
+      "name": "quest",
+      "type": "string",
+      "value": "{ \"id\": \"guard_quest_1\", \"title\": \"Find the Lost Gun\", \"description\": \"The guard lost his gun in the forest. Find it and return it to him.\", \"requiredItem\": \"gun\", \"rewardItem\": \"pass\", \"completedDialogue\": [\"Ah, you found my gun!\", \"Here, take this pass. You may proceed.\"] }"
+    }
+  ]
+}
+,
+        {
           "id": 2,
           "name": "NPC",
           "x": 200,
